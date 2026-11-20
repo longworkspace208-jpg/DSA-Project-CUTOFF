@@ -4,15 +4,13 @@ random_seeds:
   - 42
   - 1337
   - 2026
-  - 31415
-  - 27182
 
 array_sizes:
-  - 1000       # 1e3
   - 10000      # 1e4
   - 100000     # 1e5
+  - 500000     # 5e5
   - 1000000    # 1e6
-  - 10000000   # 1e7
+  - 5000000    # 5e6
 
 distributions:
   mergesort:
@@ -30,8 +28,7 @@ distribution_params:
   many_duplicates_unique_count: 100  # ~100 distinct unique values
 
 cutoffs:
-  - 1
-  - 2
+  - 0
   - 4
   - 6
   - 7
@@ -39,38 +36,35 @@ cutoffs:
   - 10
   - 12
   - 16
-  - 20
   - 24
   - 32
-  - 48
-  - 64
 
 benchmark:
   jvm_flags: "-Xms4g -Xmx4g -XX:+AlwaysPreTouch -XX:+UseParallelGC"
   jvm_version: "Oracle Corporation 25.0.2"
   adaptive_settings:
-    1000:
-      rounds: 5
-      warmup_iterations: 3
-      measurement_iterations: 5
     10000:
-      rounds: 5
-      warmup_iterations: 2
-      measurement_iterations: 5
-    100000:
-      rounds: 3
-      warmup_iterations: 2
-      measurement_iterations: 3
-    1000000:
-      rounds: 2
-      warmup_iterations: 1
-      measurement_iterations: 2
-    10000000:
       rounds: 1
       warmup_iterations: 1
-      measurement_iterations: 1
+      measurement_iterations: 4
+    100000:
+      rounds: 1
+      warmup_iterations: 1
+      measurement_iterations: 4
+    500000:
+      rounds: 1
+      warmup_iterations: 1
+      measurement_iterations: 4
+    1000000:
+      rounds: 1
+      warmup_iterations: 1
+      measurement_iterations: 4
+    5000000:
+      rounds: 1
+      warmup_iterations: 1
+      measurement_iterations: 2
 
 data_dir: "data"
 results_dir: "results"
 manifest_path: "data/MANIFEST.csv"
-bench_csv_path: "results/bench_raw.csv"
+bench_csv_path: "results/raw.csv"

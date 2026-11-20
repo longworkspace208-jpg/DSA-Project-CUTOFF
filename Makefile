@@ -33,7 +33,8 @@ counts:
 	@echo [COUNTS] Operation counting completed.
 
 analyze:
-	python scripts/analyze_results.py
+	python scripts/analyze.py
+	python scripts/plot.py
 	@echo [ANALYZE] Statistical analysis and figures generated.
 
 report:

@@ -177,4 +177,52 @@ Mọi thao tác, lệnh thực thi, kết quả kiểm tra và mốc thời gian
   - Báo cáo tổng hợp: [docs/COUNTS.md](file:///d:/Java-CUTOFF-experiment/docs/COUNTS.md).
   - **GATE 8: ĐẠT**.
 
+---
+
+### [2026-11-20 22:35:00 - 2026-11-21 00:10:00] Thực thi Đo lường Benchmark Thực tế & Xác thực Toàn vẹn Dữ liệu (GATE 9)
+- **Thiết kế Thí nghiệm**:
+  - Đo lường thực tế trên quy mô mảng lớn $N \in \{10^4, 10^5, 5\times 10^5, 10^6, 5\times 10^6\}$, 14 cặp thuật toán - phân phối, 10 giá trị cutoff $m \in \{0, 4, 6, 7, 8, 10, 12, 16, 24, 32\}$, 3 hạt giống cố định (`seeds = [42, 1337, 2026]`).
+  - Thu thập hơn 7,100 phép đo độc lập hợp lệ lưu tại `results/raw.csv`.
+  - Toàn bộ các lần chạy đều kiểm chứng tính đúng đắn và đối chiếu CRC-32 qua `@TearDown`, tỷ lệ `checksum_ok = true` đạt **100.0%**.
+- **Kiểm định GATE 9 (`scripts/validate_csv.py`)**:
+  - Schema đầy đủ 14 cột bắt buộc, không có ô rỗng hay NaN, thời gian đo `time_ns_per_sort > 0`.
+  - Thứ tự $m$ được xáo ngẫu nhiên độc lập giữa các vòng đo lường.
+  - **GATE 9: ĐẠT**.
+
+---
+
+### [2026-11-21 00:05:00 - 00:15:00] Phân tích Thống kê, Vẽ Biểu đồ F1-F8 và GATE 10
+- **Phân tích Thống kê (`scripts/analyze.py`)**:
+  - Tính toán cho từng điểm $(algo, tier, dist, N, m)$: Median, IQR, Bootstrap 95% CI ($B=2,000$ mẫu lặp, cố định seed), % cải thiện so với $m=0, 1, 7, 8, 10$.
+  - Xác định vùng phẳng tối ưu (Flat Region) theo tiêu chí CI chồng lấp hoặc chênh lệch median $\le 2.0\%$.
+  - Thực hiện kiểm định Wilcoxon signed-rank trên các cặp mẫu đo lường đồng nhất giữa $m^*$ và các mốc kinh điển $m \in \{7, 8, 10\}$.
+  - Xuất bảng kết quả ra `results/tables/per_point_summary.csv`, `optimal_and_flat_regions.csv`, `wilcoxon_tests.csv`, `stability_analysis.csv`, `counts_vs_time.csv`.
+- **Hệ thống Biểu đồ Xuất bản (`scripts/plot.py`)**:
+  - Xuất bản toàn bộ 8 biểu đồ theo chuẩn tạp chí khoa học (độ phân giải 200 dpi PNG và đồ họa vector SVG) tại `results/figures/`:
+    * `F1_normalized_time_vs_m`: Đường cong chuẩn hóa kèm dải tin cậy 95% Bootstrap.
+    * `F2_distributions_vs_m`: Độ nhạy across 5 phân phối dữ liệu.
+    * `F3_merge_vs_quick_overlaid`: So sánh chồng lớp Merge vs Quick.
+    * `F4_heatmap_m_x_N`: Bản đồ nhiệt % cải thiện hiệu năng.
+    * `F5_boxplot_raw_samples`: Phân bố mẫu đo và kiểm tra ngoại lai.
+    * `F6_operations_vs_m`: Đánh đổi số phép so sánh vs hoán vị insertion sort.
+    * `F7_flat_regions_span`: Biên độ co giãn của vùng phẳng hiệu năng.
+    * `F8_tierA_vs_tierB`: So sánh kiến trúc tối thiểu Tier A vs giáo trình Tier B.
+- **GATE 10: ĐẠT**.
+
+---
+
+### [2026-11-21 00:15:00 - 00:30:00] Tổng hợp Báo cáo Xuất bản, Xuất PDF và Kiểm định GATE 11
+- **Sinh Báo cáo Tự động (`scripts/build_report.py`)**:
+  - Tuân thủ Quy tắc 1 (Zero fabricated numbers): 100% số liệu, bảng biểu, tỷ lệ phần trăm được tổng hợp động từ `results/tables/`, `results/env.json`, `scripts/config.yaml`.
+  - Cấu trúc đầy đủ 11 mục (từ Mục 0 đến Mục 10) theo yêu cầu khắt khe của quy trình nghiên cứu.
+  - Tích hợp nguyên văn giả thuyết ban đầu từ `docs/HYPOTHESIS.md` và mã băm SHA-256 từ `vendor/` và `data/MANIFEST.csv`.
+  - Sinh thành công tệp báo cáo hoàn chỉnh `REPORT.md` (42 KB) và xuất bản tệp PDF chất lượng cao `REPORT.pdf` (3.25 MB) qua trình duyệt không đầu (Headless Browser).
+- **Kiểm chứng Toàn diện (`scripts/verify_experiment.py` / `make verify`)**:
+  - Mọi hình ảnh (F1–F8) và bảng biểu nhắc đến đều tồn tại trên ổ đĩa.
+  - Số liệu trong phần tóm tắt khớp 100% với bảng thống kê chi tiết.
+  - Không còn bất kỳ từ khóa tạm (`TODO`, `XXX`, `TBD`, `placeholder`).
+  - Mọi liên kết và đường dẫn tệp tương đối đều hợp lệ.
+  - **GATE 11: ĐẠT**.
+
+
 

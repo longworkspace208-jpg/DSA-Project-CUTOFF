@@ -75,6 +75,7 @@ public class MergeCutoff {
 
     // mergesort a[lo..hi] using auxiliary array aux[lo..hi] with cutoff m
     private static void sort(Comparable[] a, Comparable[] aux, int lo, int hi, int m) {
+        if (hi <= lo) return;
         if (hi - lo + 1 <= m) {
             Insertion.sort(a, lo, hi + 1);
             return;

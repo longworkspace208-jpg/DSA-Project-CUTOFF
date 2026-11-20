@@ -65,6 +65,7 @@ public class QuickCutoff {
 
     // quicksort the subarray from a[lo] to a[hi] with cutoff m
     private static void sort(Comparable[] a, int lo, int hi, int m) {
+        if (hi <= lo) return;
         if (hi - lo + 1 <= m) {
             Insertion.sort(a, lo, hi + 1);
             return;

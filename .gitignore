@@ -1,6 +1,9 @@
-# Large data binary files (N >= 1e6) to stay under GitHub limits
+# Large data binary files (N >= 5e5) to stay under GitHub limits
+data/*_500000_*.bin
 data/*_1000000_*.bin
+data/*_5000000_*.bin
 data/*_10000000_*.bin
+results/temp_bench_*.json
 target/
 dependency-reduced-pom.xml
 *.class
@@ -14,4 +17,3 @@ __pycache__/
 .vscode/
 *.iml
 .DS_Store
-

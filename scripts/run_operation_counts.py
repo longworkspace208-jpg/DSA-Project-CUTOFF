@@ -80,7 +80,7 @@ def verify_gate8(records, out_md_path="docs/COUNTS.md"):
     knuth_passes = True
     knuth_table = []
     for r in records:
-        if r["algo"] == "MergeCutoff" and r["dist"] == "random" and r["m"] == 1:
+        if r["algo"] == "MergeCutoff" and r["dist"] == "random" and r["m"] in (0, 1):
             n = r["N"]
             comps = r["compares"]
             theory = knuth_mergesort_compares(n)
@@ -203,8 +203,8 @@ def main():
     subprocess.run("mvn test-compile", shell=True, check=True)
 
     algos = ["MergeCutoff", "QuickCutoff", "MergeXParam", "QuickXParam"]
-    sizes = [1000, 10000, 100000]
-    cutoffs = cfg.get("cutoffs", [1, 2, 4, 6, 7, 8, 10, 12, 16, 20, 24, 32, 48, 64])
+    sizes = [10000, 100000, 500000]
+    cutoffs = cfg.get("cutoffs", [0, 4, 6, 7, 8, 10, 12, 16, 24, 32])
     seeds = [42] # Deterministic simulation across fixed seed
 
     records = []
@@ -222,7 +222,7 @@ def main():
                             print(f"[FATAL] Failed on {algo} {dist} {n} {seed} {m}")
                             sys.exit(1)
 
-                        theory = knuth_mergesort_compares(n) if (algo == "MergeCutoff" and dist == "random" and m == 1) else None
+                        theory = knuth_mergesort_compares(n) if (algo == "MergeCutoff" and dist == "random" and m in (0, 1)) else None
                         diff_pct = ((res["compares"] - theory) / theory * 100.0) if theory else None
 
                         row = {

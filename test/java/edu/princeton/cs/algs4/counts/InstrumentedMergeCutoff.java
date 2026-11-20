@@ -28,6 +28,7 @@ public class InstrumentedMergeCutoff {
     }
 
     private static void sort(Comparable[] a, Comparable[] aux, int lo, int hi, int m) {
+        if (hi <= lo) return;
         if (hi - lo + 1 <= m) {
             InstrumentedInsertion.sort(a, lo, hi + 1);
             return;

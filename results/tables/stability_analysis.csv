@@ -1,0 +1,15 @@
+group_type,algo,tier,dist,cutoffs_observed,m_min,m_max,m_mode,range_span
+Across N,MergeCutoff,TierA,many_duplicates,"0, 4, 24, 16, 32",0,32,0,32
+Across N,MergeCutoff,TierA,nearly_sorted,"12, 0, 32, 16, 7",0,32,0,32
+Across N,MergeCutoff,TierA,random,"7, 32, 24, 4, 8",4,32,4,28
+Across N,MergeCutoff,TierA,reversed,"0, 7, 7, 12, 10",0,12,7,12
+Across N,MergeCutoff,TierA,sorted,"0, 24, 8, 32, 24",0,32,24,32
+Across N,MergeXParam,TierB,many_duplicates,"7, 4, 7, 32",4,32,7,28
+Across N,MergeXParam,TierB,nearly_sorted,"6, 32, 6, 10",6,32,6,26
+Across N,MergeXParam,TierB,random,"7, 12, 16, 6",6,16,6,10
+Across N,MergeXParam,TierB,reversed,"4, 12, 7, 6",4,12,4,8
+Across N,MergeXParam,TierB,sorted,"24, 12, 24, 32",12,32,24,20
+Across N,QuickCutoff,TierA,many_duplicates,"24, 12, 32, 16, 16",12,32,16,20
+Across N,QuickCutoff,TierA,random,"8, 32, 32, 16, 8",8,32,8,24
+Across N,QuickXParam,TierB,many_duplicates,"0, 16, 10, 24",0,24,0,24
+Across N,QuickXParam,TierB,random,"32, 32, 10, 16",10,32,32,22

@@ -26,6 +26,7 @@ def prepare_merge_cutoff():
 
     new_sort = """    // mergesort a[lo..hi] using auxiliary array aux[lo..hi] with cutoff m
     private static void sort(Comparable[] a, Comparable[] aux, int lo, int hi, int m) {
+        if (hi <= lo) return;
         if (hi - lo + 1 <= m) {
             Insertion.sort(a, lo, hi + 1);
             return;
@@ -110,6 +111,7 @@ def prepare_quick_cutoff():
 
     new_priv_sort = """    // quicksort the subarray from a[lo] to a[hi] with cutoff m
     private static void sort(Comparable[] a, int lo, int hi, int m) {
+        if (hi <= lo) return;
         if (hi - lo + 1 <= m) {
             Insertion.sort(a, lo, hi + 1);
             return;

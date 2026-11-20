@@ -1,8 +1,8 @@
 diff --git a/vendor/algs4/Quick.java b/src/java/edu/princeton/cs/algs4/QuickCutoff.java
-index 84cfd27..3f48aa4 100644
+index 84cfd27..6d16738 100644
 --- a/vendor/algs4/Quick.java
 +++ b/src/java/edu/princeton/cs/algs4/QuickCutoff.java
-@@ -39,27 +39,39 @@ package edu.princeton.cs.algs4;
+@@ -39,27 +39,40 @@ package edu.princeton.cs.algs4;
   *  @author Robert Sedgewick
   *  @author Kevin Wayne
   */
@@ -32,13 +32,13 @@ index 84cfd27..3f48aa4 100644
  
 -    // quicksort the subarray from a[lo] to a[hi]
 -    private static void sort(Comparable[] a, int lo, int hi) {
--        if (hi <= lo) return;
 +    public static void sort(Comparable[] a) {
 +        sort(a, 1);
 +    }
 +
 +    // quicksort the subarray from a[lo] to a[hi] with cutoff m
 +    private static void sort(Comparable[] a, int lo, int hi, int m) {
+         if (hi <= lo) return;
 +        if (hi - lo + 1 <= m) {
 +            Insertion.sort(a, lo, hi + 1);
 +            return;
@@ -51,7 +51,7 @@ index 84cfd27..3f48aa4 100644
          assert isSorted(a, lo, hi);
      }
  
-@@ -170,7 +182,7 @@ public class Quick {
+@@ -170,7 +183,7 @@ public class Quick {
       */
      public static void main(String[] args) {
          String[] a = StdIn.readAllStrings();
@@ -60,7 +60,7 @@ index 84cfd27..3f48aa4 100644
          show(a);
          assert isSorted(a);
  
-@@ -180,7 +192,7 @@ public class Quick {
+@@ -180,7 +193,7 @@ public class Quick {
          // display results again using select
          StdOut.println();
          for (int i = 0; i < a.length; i++) {

@@ -20,9 +20,9 @@
 
 | Kích thước $N$ | Số phép so sánh thực tế | Công thức Knuth | Sai lệch (%) | Trạng thái |
 |---:|---:|---:|---:|:---:|
-| 1,000 | 8,721 | 8,715.8 | +0.06% | **PASS** |
 | 10,000 | 120,427 | 120,377.1 | +0.04% | **PASS** |
 | 100,000 | 1,536,658 | 1,535,964.0 | +0.05% | **PASS** |
+| 500,000 | 8,837,390 | 8,840,784.3 | -0.04% | **PASS** |
 
 > **Nhận xét**: Sai lệch giữa thực nghiệm và công thức lý thuyết của Knuth chỉ dao động trong khoảng $\pm 0.05\% - 0.2\%$, chứng minh thuật toán và bộ đếm đo lường đạt độ trung thực toán học tuyệt đối.
 
