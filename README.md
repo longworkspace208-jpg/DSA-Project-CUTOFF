@@ -6,7 +6,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Status: Fully Verified](https://img.shields.io/badge/Status-Fully%20Verified%20(Gate%2011%20Passed)-success.svg)](#-kiểm-chứng--tính-tái-lập)
 
-Dự án nghiên cứu hiệu năng thực nghiệm quy mô lớn nhằm xác định **ngưỡng CUTOFF ($m$) tối ưu** (chuyển sang Insertion Sort khi kích thước mảng con $k \le m$) cho hai thuật toán sắp xếp kinh điển: **MergeSort** và **QuickSort**.
+Dự án nghiên cứu hiệu năng thực nghiệm quy mô lớn nhằm xác định **ngưỡng CUTOFF (m) tối ưu** (chuyển sang Insertion Sort khi kích thước mảng con k ≤ m) cho hai thuật toán sắp xếp kinh điển: **MergeSort** và **QuickSort**.
 
 Toàn bộ thuật toán được trích xuất trực tiếp từ thư viện **Princeton University `algs4`** của Giáo sư **Robert Sedgewick và Kevin Wayne** với sửa đổi tối thiểu (minimal diffs), đo lường thực tế trên vi kiến trúc hiện đại (Intel Core i7-11800H, JVM HotSpot C2, mảng đối tượng `Integer[]`).
 
@@ -30,12 +30,12 @@ Toàn bộ thuật toán được trích xuất trực tiếp từ thư viện *
 
 ## 1. Tổng quan Dự án
 
-Trong các giáo trình cấu trúc dữ liệu kinh điển, việc kết hợp thuật toán sắp xếp đệ quy $O(N \log N)$ với **Insertion Sort** trên mảng con nhỏ được coi là kỹ thuật chuẩn hóa để triệt tiêu chi phí đệ quy và tối ưu hóa bộ nhớ đệm CPU. Tuy nhiên, các giá trị khuyến nghị như $m = 7$ (trong `MergeX`), $m = 8$ (trong `QuickX`) hay $m \in [5, 15]$ thường được đưa ra từ nhiều thập kỷ trước.
+Trong các giáo trình cấu trúc dữ liệu kinh điển, việc kết hợp thuật toán sắp xếp đệ quy O(N log N) với **Insertion Sort** trên mảng con nhỏ được coi là kỹ thuật chuẩn hóa để triệt tiêu chi phí đệ quy và tối ưu hóa bộ nhớ đệm CPU. Tuy nhiên, các giá trị khuyến nghị như m = 7 (trong `MergeX`), m = 8 (trong `QuickX`) hay m ∈ [5, 15] thường được đưa ra từ nhiều thập kỷ trước.
 
 ### Mục tiêu nghiên cứu:
-1. Xác định chính xác giá trị $m^*$ tối ưu thực nghiệm trên phần cứng vi kiến trúc và JVM hiện đại.
+1. Xác định chính xác giá trị **m*** tối ưu thực nghiệm trên phần cứng vi kiến trúc và JVM hiện đại.
 2. Kiểm chứng sự tồn tại và biên độ của **Vùng phẳng hiệu năng (Performance Flat Region)**.
-3. Sử dụng kiểm định phi tham số **Wilcoxon signed-rank** để đánh giá xem $m^*$ thực nghiệm có vượt trội hơn các mốc giáo trình ($m=7, 8, 10$) hay không.
+3. Sử dụng kiểm định phi tham số **Wilcoxon signed-rank** để đánh giá xem m* thực nghiệm có vượt trội hơn các mốc giáo trình (m = 7, 8, 10) hay không.
 4. Giải thích cơ chế vật lý thông qua số phép so sánh, hoán vị và dung lượng **L1 Data Cache (48 KB)**.
 
 ### Cam kết liêm chính học thuật (Scientific Rigor):
@@ -48,12 +48,12 @@ Trong các giáo trình cấu trúc dữ liệu kinh điển, việc kết hợp
 
 ### 2.1. Bảng tổng hợp Kết quả Tối ưu (Phân phối Random)
 
-| Thuật toán | Cấp độ | Cutoff Tối ưu $m^*$ | Vùng phẳng Tối ưu (Flat Region) | Baseline $m=0$ | Tăng tốc Tối đa | Đánh giá vs Giá trị Giáo trình ($m=7, 8, 10$) |
+| Thuật toán | Cấp độ | Cutoff Tối ưu m* | Vùng phẳng Tối ưu (Flat Region) | Baseline m = 0 | Tăng tốc Tối đa | Đánh giá vs Giá trị Giáo trình (m = 7, 8, 10) |
 |:---|:---:|:---:|:---:|:---:|:---:|:---|
-| **MergeCutoff** | Tier A (Tối thiểu) | **$m^* \approx 8$** (4 – 32) | **$[4, 32]$** (Tâm: 10) | Không cutoff | **+23.51%** | Nằm trọn vẹn trong vùng phẳng; chênh lệch $< 1.5\%$ (Within Noise) |
-| **QuickCutoff** | Tier A (Tối thiểu) | **$m^* \approx 16$** (8 – 32) | **$[4, 32]$** (Tâm: 10) | Không cutoff | **+30.70%** | Nằm trọn vẹn trong vùng phẳng; kiểm định Wilcoxon $p > 0.05$ |
-| **MergeXParam** | Tier B (Princeton) | **$m^* \approx 7 - 12$** | **$[4, 16]$** (Tâm: 8) | Không cutoff | **+18.23%** | Trùng khớp hoàn toàn thiết kế của Sedgewick ($CUTOFF = 7$) |
-| **QuickXParam** | Tier B (Princeton) | **$m^* \approx 10 - 16$** | **$[6, 32]$** (Tâm: 12) | Không cutoff | **+18.56%** | $m \ge 8$ là sàn vật lý để bù đắp chi phí median-of-3 |
+| **MergeCutoff** | Tier A (Tối thiểu) | **m\* ≈ 8** (4 – 32) | **[4, 32]** (Tâm: 10) | Không cutoff | **+23.51%** | Nằm trọn vẹn trong vùng phẳng; chênh lệch < 1.5% (Within Noise) |
+| **QuickCutoff** | Tier A (Tối thiểu) | **m\* ≈ 16** (8 – 32) | **[4, 32]** (Tâm: 10) | Không cutoff | **+30.70%** | Nằm trọn vẹn trong vùng phẳng; kiểm định Wilcoxon p > 0.05 |
+| **MergeXParam** | Tier B (Princeton) | **m\* ≈ 7 – 12** | **[4, 16]** (Tâm: 8) | Không cutoff | **+18.23%** | Trùng khớp hoàn toàn thiết kế của Sedgewick (CUTOFF = 7) |
+| **QuickXParam** | Tier B (Princeton) | **m\* ≈ 10 – 16** | **[6, 32]** (Tâm: 12) | Không cutoff | **+18.56%** | m ≥ 8 là sàn vật lý để bù đắp chi phí median-of-3 |
 
 ### 2.2. Đồ thị Thời gian Chuẩn hóa & So sánh Merge vs Quick
 
