@@ -24,8 +24,9 @@ data:
 
 bench:
 	mvn package -DskipTests
-	java -jar target/benchmarks.jar ".*SortingBenchmark.*" -rf csv -rff results/bench_raw.csv
-	@echo [BENCH] Benchmarks completed.
+	python scripts/run_bench.py
+	python scripts/validate_csv.py
+	@echo [BENCH] Benchmarks completed and validated.
 
 counts:
 	python scripts/run_operation_counts.py

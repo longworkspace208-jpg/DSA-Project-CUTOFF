@@ -117,3 +117,28 @@ Mọi thao tác, lệnh thực thi, kết quả kiểm tra và mốc thời gian
   - In bảng thống kê chi tiết các mẫu đại diện.
   - Tuân thủ giới hạn GitHub: Không commit các file $N \ge 10^6$, ghi nhận hướng dẫn trong `README.md`.
   - **GATE 5: ĐẠT**.
+
+---
+
+### [2026-11-20 21:54:00 - 22:00:15] Hiện thực JMH Benchmark Harness, điều phối Python và hoàn thành GATE 6
+- **JMH Benchmark Harness (`benchmark/java/edu/princeton/cs/algs4/cutoff/SortingBenchmark.java`)**:
+  - Chế độ đo lường: `Mode.SingleShotTime` với `OutputTimeUnit(TimeUnit.MICROSECONDS)`.
+  - Cơ chế gom mẫu (Batching): Phân bổ $K$ bản sao mảng độc lập được chuẩn bị sẵn trong `@Setup(Level.Iteration)` ngoài thời gian đo ($K=20$ cho $N=10^3$, $K=5$ cho $N=10^4$, $K=1$ cho $N \ge 10^5$), thời gian trả về là tổng/K.
+  - Tải dữ liệu: Đọc file nhị phân `.bin` một lần duy nhất trong `@Setup(Level.Trial)` thành `Integer[] orig`. Mảng làm việc là bản sao nông (shallow copy tham chiếu).
+  - Khử dead code: Dùng `Blackhole.consume(target)`.
+  - Kiểm tra tính đúng đắn & Checksum: Trong `@TearDown(Level.Iteration)`, kiểm tra mọi bản sao đã được sắp xếp tăng dần và so sánh SHA-256 đối chiếu với `data/MANIFEST.csv`. Báo lỗi hủy bỏ nếu phát hiện bất thường.
+  - Cấu hình JVM độc lập: `@Fork(1)` cho mỗi giá trị cutoff được gọi, tham số JVM: `-Xms4g -Xmx4g -XX:+AlwaysPreTouch -XX:+UseParallelGC`.
+- **Bộ điều phối (`scripts/run_bench.py`)**:
+  - Chạy theo từng vòng (`round`): Mỗi vòng xáo ngẫu nhiên thứ tự các $m$ với seed xác định được lưu lại (`m_shuffle_seed = base_seed * 1000 + round`).
+  - Hỗ trợ resume khi bị ngắt quãng bằng cách đọc các dòng đã hoàn thành trong CSV.
+  - Ghi nhật ký tiến độ chi tiết vào `results/run.log`.
+- **Bộ kiểm định chất lượng dữ liệu (`scripts/validate_csv.py`)**:
+  - Kiểm tra schema: Đầy đủ các cột (`algo, tier, dist, N, seed, m, round, iter, time_ns_per_sort, K, jvm, flags, checksum_ok`).
+  - Kiểm tra tính toàn vẹn: Không chứa giá trị rỗng/NaN, thời gian đo `time_ns_per_sort > 0`, và `checksum_ok == True`.
+  - Xác thực xáo thứ tự $m$: Khẳng định thứ tự $m$ thực sự thay đổi giữa các vòng.
+- **Thử nghiệm kiểm chứng GATE 6 (`--gate6`)**:
+  - Tham số: $N = 10^5$, phân phối `random`, seed `42`, $m \in \{1, 8, 16, 32\}$, cả 4 biến thể (`MergeCutoff`, `QuickCutoff`, `MergeXParam`, `QuickXParam`), 3 rounds, 2 measurement iterations = 96 bản ghi.
+  - Lệnh: `python scripts/run_bench.py --gate6` và `python scripts/validate_csv.py results/bench_raw.csv`.
+  - Kết quả: Schema chuẩn xác 100%, tất cả checksum đều đạt `true`, thứ tự $m$ thay đổi giữa các vòng (Round 1: [1, 16, 8, 32], Round 2: [32, 8, 16, 1]), các thuật toán thực thi trơn tru với độ ổn định cao.
+  - **GATE 6: ĐẠT**.
+

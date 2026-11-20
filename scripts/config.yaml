@@ -45,6 +45,32 @@ cutoffs:
   - 48
   - 64
 
+benchmark:
+  jvm_flags: "-Xms4g -Xmx4g -XX:+AlwaysPreTouch -XX:+UseParallelGC"
+  jvm_version: "Oracle Corporation 25.0.2"
+  adaptive_settings:
+    1000:
+      rounds: 5
+      warmup_iterations: 3
+      measurement_iterations: 5
+    10000:
+      rounds: 5
+      warmup_iterations: 2
+      measurement_iterations: 5
+    100000:
+      rounds: 3
+      warmup_iterations: 2
+      measurement_iterations: 3
+    1000000:
+      rounds: 2
+      warmup_iterations: 1
+      measurement_iterations: 2
+    10000000:
+      rounds: 1
+      warmup_iterations: 1
+      measurement_iterations: 1
+
 data_dir: "data"
 results_dir: "results"
 manifest_path: "data/MANIFEST.csv"
+bench_csv_path: "results/bench_raw.csv"
