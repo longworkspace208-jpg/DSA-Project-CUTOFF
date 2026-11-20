@@ -509,7 +509,7 @@ def build_report():
     export_pdf()
 
 def export_pdf():
-    print("Attempting to export REPORT.pdf via Headless Browser...")
+    print("Exporting high-quality academic REPORT.pdf via Headless Browser with KaTeX math rendering...")
     edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
     chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
     browser = edge_path if os.path.isfile(edge_path) else (chrome_path if os.path.isfile(chrome_path) else None)
@@ -518,107 +518,256 @@ def export_pdf():
         print("[INFO] No Chrome/Edge browser found for PDF export. Skipping PDF.")
         return
 
-    # Convert REPORT.md to a clean standalone HTML first
-    import html
+    import markdown
+    import re
+
     with open("REPORT.md", "r", encoding="utf-8") as f:
         md_text = f.read()
 
-    # Simple Markdown-to-HTML converter for tables, headers, and images
-    html_lines = [
-        "<!DOCTYPE html>",
-        "<html><head><meta charset='utf-8'>",
-        "<title>REPORT: Java Sorting Cutoff Optimization</title>",
-        "<style>",
-        "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 960px; margin: 40px auto; padding: 0 20px; color: #24292e; }",
-        "h1, h2, h3, h4 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; margin-top: 24px; margin-bottom: 16px; }",
-        "h1 { font-size: 2em; border-bottom: 2px solid #eaecef; }",
-        "h2 { font-size: 1.5em; }",
-        "table { border-collapse: collapse; width: 100%; margin: 16px 0; display: table; font-size: 13px; }",
-        "th, td { border: 1px solid #dfe2e5; padding: 6px 12px; text-align: left; }",
-        "th { background-color: #f6f8fa; font-weight: 600; }",
-        "tr:nth-child(2n) { background-color: #fafbfc; }",
-        "code { background-color: rgba(27,31,35,0.05); border-radius: 3px; font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace; font-size: 85%; padding: 0.2em 0.4em; }",
-        "pre code { background-color: transparent; padding: 0; }",
-        "pre { background-color: #f6f8fa; border-radius: 3px; font-size: 85%; line-height: 1.45; overflow: auto; padding: 16px; }",
-        "blockquote { border-left: 0.25em solid #dfe2e5; color: #6a737d; padding: 0 1em; margin: 0; }",
-        "img { max-width: 100%; height: auto; display: block; margin: 16px auto; border: 1px solid #dfe2e5; border-radius: 4px; }",
-        "@media print { body { max-width: 100%; margin: 20px; } h2, h3 { page-break-after: avoid; } table, img { page-break-inside: avoid; } }",
-        "</style></head><body>"
-    ]
+    # Pre-process image paths to absolute file:// URLs so headless browser resolves them
+    def replace_img_src(match):
+        alt = match.group(1)
+        src = match.group(2)
+        abs_src = os.path.abspath(src).replace("\\", "/")
+        return f"![{alt}](file:///{abs_src})"
 
-    in_table = False
-    in_code = False
-    for line in md_text.splitlines():
-        s = line.strip()
-        if s.startswith("```"):
-            if in_code:
-                html_lines.append("</code></pre>")
-                in_code = False
-            else:
-                html_lines.append("<pre><code>")
-                in_code = True
-            continue
-        if in_code:
-            html_lines.append(html.escape(line))
-            continue
+    md_text_processed = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)', replace_img_src, md_text)
 
-        if s.startswith("|") and s.endswith("|"):
-            parts = [p.strip() for p in s.split("|")[1:-1]]
-            if all(set(p) <= set("-: ") for p in parts if p):
-                continue # separator
-            if not in_table:
-                html_lines.append("<table><tbody>")
-                in_table = True
-                html_lines.append("<tr>" + "".join(f"<th>{html.escape(p)}</th>" for p in parts) + "</tr>")
-            else:
-                html_lines.append("<tr>" + "".join(f"<td>{html.escape(p)}</td>" for p in parts) + "</tr>")
-            continue
-        else:
-            if in_table:
-                html_lines.append("</tbody></table>")
-                in_table = False
+    # Convert GitHub alert callouts (> [!NOTE], > [!TIP], > [!IMPORTANT])
+    md_text_processed = re.sub(r'>\s*\[!NOTE\]\s*\n', '> **LƯU Ý:** ', md_text_processed)
+    md_text_processed = re.sub(r'>\s*\[!TIP\]\s*\n', '> **KHUYẾN NGHỊ:** ', md_text_processed)
+    md_text_processed = re.sub(r'>\s*\[!IMPORTANT\]\s*\n', '> **QUAN TRỌNG:** ', md_text_processed)
 
-        if s.startswith("# "):
-            html_lines.append(f"<h1>{html.escape(s[2:])}</h1>")
-        elif s.startswith("## "):
-            html_lines.append(f"<h2>{html.escape(s[3:])}</h2>")
-        elif s.startswith("### "):
-            html_lines.append(f"<h3>{html.escape(s[4:])}</h3>")
-        elif s.startswith("#### "):
-            html_lines.append(f"<h4>{html.escape(s[5:])}</h4>")
-        elif s.startswith("> "):
-            html_lines.append(f"<blockquote>{html.escape(s[2:])}</blockquote>")
-        elif s.startswith("![") and "](" in s and s.endswith(")"):
-            alt = s[2:s.index("](")]
-            src = s[s.index("](") + 2:-1]
-            abs_src = os.path.abspath(src).replace("\\", "/")
-            html_lines.append(f"<img src='file:///{abs_src}' alt='{html.escape(alt)}'>")
-        elif s.startswith("---"):
-            html_lines.append("<hr>")
-        elif s:
-            html_lines.append(f"<p>{html.escape(s)}</p>")
+    # Convert markdown to HTML using official python-markdown with tables, code, and math
+    html_body = markdown.markdown(
+        md_text_processed,
+        extensions=[
+            "tables",
+            "fenced_code",
+            "pymdownx.arithmatex"
+        ],
+        extension_configs={
+            "pymdownx.arithmatex": {
+                "generic": True
+            }
+        }
+    )
 
-    if in_table:
-        html_lines.append("</tbody></table>")
-    html_lines.append("</body></html>")
+    full_html = f"""<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>BÁO CÁO KHOA HỌC: ĐIỂM CUTOFF CHO MERGESORT VÀ QUICKSORT TRÊN JAVA</title>
+<!-- KaTeX Math Rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {{
+    renderMathInElement(document.body, {{
+        delimiters: [
+            {{left: "$$", right: "$$", display: true}},
+            {{left: "\\\\[", right: "\\\\]", display: true}},
+            {{left: "\\\\(", right: "\\\\)", display: false}},
+            {{left: "$", right: "$", display: false}}
+        ],
+        throwOnError: false
+    }});
+}});
+</script>
+<style>
+@page {{
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
+    @bottom-center {{
+        content: counter(page);
+    }}
+}}
+
+body {{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: #1e293b;
+    background-color: #ffffff;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}}
+
+h1 {{
+    font-size: 20pt;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 2.5px solid #0284c7;
+    padding-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 12px;
+}}
+
+h2 {{
+    font-size: 14pt;
+    font-weight: 700;
+    color: #1e293b;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin-top: 26px;
+    margin-bottom: 14px;
+    page-break-after: avoid;
+}}
+
+h2:not(:first-of-type) {{
+    page-break-before: auto;
+}}
+
+h3 {{
+    font-size: 12pt;
+    font-weight: 600;
+    color: #334155;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+}}
+
+h4 {{
+    font-size: 11pt;
+    font-weight: 600;
+    color: #475569;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+}}
+
+p, ul, ol {{
+    margin-top: 6px;
+    margin-bottom: 10px;
+}}
+
+ul, ol {{
+    padding-left: 24px;
+}}
+
+li {{
+    margin-bottom: 4px;
+}}
+
+table {{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+}}
+
+th, td {{
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    text-align: left;
+}}
+
+th {{
+    background-color: #f1f5f9;
+    font-weight: 600;
+    color: #0f172a;
+}}
+
+tr:nth-child(even) {{
+    background-color: #f8fafc;
+}}
+
+blockquote {{
+    border-left: 4px solid #0284c7;
+    background-color: #f0f9ff;
+    color: #0369a1;
+    padding: 10px 16px;
+    margin: 14px 0;
+    border-radius: 0 4px 4px 0;
+    page-break-inside: avoid;
+}}
+
+blockquote p {{
+    margin: 0;
+}}
+
+code {{
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 9pt;
+    background-color: #f1f5f9;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #0f172a;
+}}
+
+pre {{
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 8.5pt;
+    overflow-x: auto;
+    page-break-inside: avoid;
+    margin: 12px 0;
+}}
+
+pre code {{
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+}}
+
+img {{
+    max-width: 94%;
+    height: auto;
+    display: block;
+    margin: 16px auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    page-break-inside: avoid;
+}}
+
+em {{
+    color: #475569;
+    font-size: 9.5pt;
+}}
+
+hr {{
+    border: 0;
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 22px 0;
+}}
+
+.arithmatex {{
+    font-size: 105%;
+}}
+</style>
+</head>
+<body>
+{html_body}
+</body>
+</html>
+"""
 
     html_path = os.path.abspath("REPORT.html")
     pdf_path = os.path.abspath("REPORT.pdf")
     with open(html_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(html_lines))
+        f.write(full_html)
 
     cmd = [
         browser,
         "--headless",
         "--disable-gpu",
+        "--run-all-compositor-stages-before-draw",
+        "--virtual-time-budget=6000",
         "--no-pdf-header-footer",
         f"--print-to-pdf={pdf_path}",
         f"file:///{html_path.replace(os.sep, '/')}"
     ]
     try:
-        res = subprocess.run(cmd, capture_output=True, timeout=30)
+        res = subprocess.run(cmd, capture_output=True, timeout=45)
         if os.path.isfile(pdf_path) and os.path.getsize(pdf_path) > 1000:
-            print(f"[SUCCESS] REPORT.pdf generated successfully ({os.path.getsize(pdf_path):,} bytes).")
+            print(f"[SUCCESS] High-quality REPORT.pdf generated successfully ({os.path.getsize(pdf_path):,} bytes).")
         else:
             print(f"[WARN] PDF generation finished but file was not created or empty. Output: {res.stderr.decode('utf-8', errors='ignore')}")
     except Exception as e:
