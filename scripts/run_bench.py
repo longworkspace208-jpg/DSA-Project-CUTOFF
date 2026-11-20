@@ -87,7 +87,7 @@ def run_jmh_single_m(algo, dist, n, seed, m, round_num, wi, meas, config, csv_pa
 
     cmd = [
         "java",
-        *jvm_flags_list,
+        "-Xms256m", "-Xmx512m",
         "-jar", "target/benchmarks.jar",
         "SortingBenchmark",
         "-p", f"algo={algo}",
@@ -98,38 +98,50 @@ def run_jmh_single_m(algo, dist, n, seed, m, round_num, wi, meas, config, csv_pa
         "-wi", str(wi),
         "-i", str(meas),
         "-f", "1",
+        "-jvmArgs", jvm_flags_str,
         "-rf", "json",
         "-rff", temp_json
     ]
 
     log_message(f"Starting JMH: algo={algo} dist={dist} N={n} seed={seed} m={m} round={round_num}", log_path)
-    res = subprocess.run(cmd, capture_output=True, text=True)
-
-    if res.returncode != 0:
+    max_retries = 2
+    for attempt in range(1, max_retries + 1):
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode == 0:
+            break
+        log_message(f"[WARN] JMH attempt {attempt}/{max_retries} failed for m={m}. Retrying in 1s...", log_path)
+        time.sleep(1.0)
+    else:
         log_message(f"[ERROR] JMH failed for m={m} code={res.returncode}:\n{res.stderr or res.stdout}", log_path)
         if os.path.exists(temp_json):
             os.remove(temp_json)
         return False
 
-    if not os.path.isfile(temp_json):
-        log_message(f"[ERROR] JMH did not produce JSON output at {temp_json}", log_path)
-        return False
-
-    with open(temp_json, "r", encoding="utf-8") as f:
-        raw_text = f.read()
+    raw_scores = []
+    if os.path.isfile(temp_json):
         try:
-            data = json.loads(raw_text)
-        except Exception as e:
-            log_message(f"[ERROR] JSON parse error: {e}, raw_text: {raw_text}", log_path)
-            data = None
-    if os.path.exists(temp_json):
-        os.remove(temp_json)
+            with open(temp_json, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if data and len(data) > 0 and "primaryMetric" in data[0] and "rawData" in data[0]["primaryMetric"]:
+                raw_scores = data[0]["primaryMetric"]["rawData"][0]
+        except Exception:
+            pass
+        try:
+            os.remove(temp_json)
+        except Exception:
+            pass
 
-    if not data or len(data) == 0 or "primaryMetric" not in data[0] or "rawData" not in data[0]["primaryMetric"]:
-        log_message(f"[ERROR] Malformed JMH JSON for m={m}. Data: {data}\nSTDOUT: {res.stdout}\nSTDERR: {res.stderr}", log_path)
+    if not raw_scores:
+        import re
+        meas_re = re.compile(r"^\s*Iteration\s+(\d+):\s+([\d\.]+)\s+ns/op")
+        for line in res.stdout.splitlines():
+            m_match = meas_re.match(line.strip())
+            if m_match:
+                raw_scores.append(float(m_match.group(2)))
+
+    if not raw_scores:
+        log_message(f"[ERROR] Could not extract measurement iterations for m={m}. STDOUT:\n{res.stdout}", log_path)
         return False
-
-    raw_scores = data[0]["primaryMetric"]["rawData"][0]
 
     rows_to_append = []
     for iter_idx, score_ns in enumerate(raw_scores, start=1):

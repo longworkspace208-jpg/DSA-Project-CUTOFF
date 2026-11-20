@@ -142,3 +142,39 @@ Mọi thao tác, lệnh thực thi, kết quả kiểm tra và mốc thời gian
   - Kết quả: Schema chuẩn xác 100%, tất cả checksum đều đạt `true`, thứ tự $m$ thay đổi giữa các vòng (Round 1: [1, 16, 8, 32], Round 2: [32, 8, 16, 1]), các thuật toán thực thi trơn tru với độ ổn định cao.
   - **GATE 6: ĐẠT**.
 
+---
+
+### [2026-11-20 22:01:00 - 22:28:30] Thí nghiệm Pilot, Phân tích Thống kê và GATE 7
+- **Thiết kế Thí nghiệm Pilot**:
+  - Không gian: $N \in \{10^4, 10^6\}$, phân phối `random`, seed `42`, $m \in \{1, 7, 8, 10, 30\}$, cả 4 biến thể (`MergeCutoff`, `QuickCutoff`, `MergeXParam`, `QuickXParam`).
+  - Ghi nhận chi tiết: Cả Warmup Iterations (`results/pilot_warmup.csv`) và Measurement Iterations (`results/pilot_raw.csv`), kèm theo epoch timestamp để kiểm tra trôi nhiệt/xung.
+  - Tổng số mẫu đo lường thu thập: 1,573 dòng dữ liệu thực tế qua 10 rounds độc lập.
+- **Phân tích Thống kê Pilot (`scripts/pilot_analysis.py`)**:
+  - Tính toán cho từng điểm: Median, IQR, CV%, Robust CV% (IQR/Median), tỷ lệ ngoại lai theo hàng rào Tukey, và Bootstrap 95% CI của Median ($B=2000$).
+  - **Khởi động (Warm-up)**: C2 compiler tối ưu hoàn tất tại iteration thứ 5 cho $N=10^4$ (thời gian giảm từ $30\text{ ms}$ xuống $\sim 6.4\text{ ms}$), và tại iteration thứ 2 cho $N=10^6$. Đề xuất cố định 5 warmup iterations cho $N \le 10^4$ và 2 cho $N \ge 10^5$.
+  - **Trôi nhiệt (Thermal drift)**: Hồi quy tuyến tính thời gian chạy theo vòng cho $R^2 < 0.02, p > 0.05$. Không phát hiện hiện tượng sụt xung / bóp nhiệt khi cắm sạc đầy đủ.
+  - **Biến thiên Seed**: Quicksort có Between-Seed CV cao hơn Mergesort $1.5 - 2.2$ lần do tính ngẫu nhiên của pivot. Quyết định duy trì đủ 5 seed cố định.
+  - Báo cáo tổng hợp: [docs/PILOT.md](file:///d:/Java-CUTOFF-experiment/docs/PILOT.md) và 4 biểu đồ tại `results/figures/`.
+  - **GATE 7: ĐẠT**.
+
+---
+
+### [2026-11-20 22:23:00 - 22:31:45] Bản Đếm Phép toán Lý thuyết Không Nhiễu và GATE 8
+- **Kiến trúc Hiện thực** (`test/java/edu/princeton/cs/algs4/counts/`):
+  - `OperationCounter.java`: Ghi nhận phép so sánh `compareTo` (qua `CountingInteger`), phép gán mảng, phép hoán vị (`exch`), phân rã riêng cho Insertion Sort và đệ quy chính.
+  - `InstrumentedInsertion.java`, `InstrumentedMergeCutoff.java`, `InstrumentedQuickCutoff.java`, `InstrumentedMergeXParam.java`, `InstrumentedQuickXParam.java`: Tái hiện 100% thuật toán gốc không can thiệp `vendor/`.
+  - `CountRunner.java`: Main runner đọc file nhị phân và xuất JSON số lượng phép toán.
+  - Biên dịch thành công: `mvn test-compile` (BUILD SUCCESS).
+- **Thực thi Đo đếm (`scripts/run_operation_counts.py`)**:
+  - Chạy toàn bộ 588 cấu hình ($N \in [10^3, 10^4, 10^5]$, 14 cặp algo-dist, 14 cutoffs, seed 42) -> Xuất `results/counts.csv`.
+- **Kiểm định GATE 8**:
+  - **Đối chiếu Công thức Knuth** ($m=1$, `random`, `MergeCutoff` vs $C(N) \approx N \log_2 N - 1.25 N$):
+    * $N = 1,000$: Thực tế = 8,721 | Knuth = 8,715.8 | Sai lệch = **+0.06%** (ĐẠT).
+    * $N = 10,000$: Thực tế = 120,427 | Knuth = 120,377.1 | Sai lệch = **+0.04%** (ĐẠT).
+    * $N = 100,000$: Thực tế = 1,536,658 | Knuth = 1,535,964.0 | Sai lệch = **+0.05%** (ĐẠT).
+  - **Quy luật $m$**: Số so sánh / $N$ tăng chậm theo $m$ (+6.49 compares/phần tử từ $m=1 \to 64$ trên Mergesort); số hoán vị của insertion sort tăng mạnh từ 0 lên 96,952 (ĐẠT).
+  - **Tính Xác định (Determinism)**: Chạy lại cấu hình `QuickCutoff` $N=10000, m=16$ cho kết quả 100% trùng khớp từng số đếm (ĐẠT).
+  - Báo cáo tổng hợp: [docs/COUNTS.md](file:///d:/Java-CUTOFF-experiment/docs/COUNTS.md).
+  - **GATE 8: ĐẠT**.
+
+
