@@ -1,0 +1,58 @@
+# Experiment Worklog (Nhật Ký Thí Nghiệm)
+
+Mọi thao tác, lệnh thực thi, kết quả kiểm tra và mốc thời gian được ghi nhận đầy đủ theo Quy tắc bắt buộc 3.
+
+---
+
+### [2026-11-20 21:30:23] Khảo sát môi trường và xác nhận yêu cầu ban đầu
+- **Lệnh thực thi**:
+  - `Get-ChildItem -Force`
+  - `java -version; javac -version; python --version; git --version`
+  - `Get-CimInstance Win32_Processor`, `Win32_OperatingSystem`, `Win32_CacheMemory`, `Win32_Battery`, `Win32_PhysicalMemory`
+  - `powercfg /getactivescheme`
+- **Kết quả**:
+  - Workspace trống.
+  - CPU: Intel Core i7-11800H @ 2.30GHz, 8 Cores / 16 Threads.
+  - L1 Cache: 640 KB (384 KB Data + 256 KB Inst), L2: 10 MB, L3: 24 MB.
+  - RAM: 15.77 GB (2x 8GB DDR4-3200).
+  - Nguồn: Cắm sạc AC, Power scheme "High performance".
+  - Java: 25.0.2 LTS.
+  - Python: 3.14.6 (đã cài bổ sung `pyyaml` 6.0.3).
+  - Make: GNU Make 3.81.
+  - Chưa có Maven trong PATH hệ thống.
+
+---
+
+### [2026-11-20 21:32:30] Cài đặt và cấu hình Apache Maven 3.9.6
+- **Lệnh thực thi**:
+  - Tải `apache-maven-3.9.6-bin.zip` từ Apache Archive về `C:\tools\apache-maven-3.9.6`.
+  - Cấu hình wrapper proxy tại `C:\MingW64\mingw32\bin\mvn.cmd` trỏ tới `C:\tools\apache-maven-3.9.6\bin\mvn.cmd`.
+  - Kiểm tra lệnh: `mvn -v`
+- **Kết quả**:
+  - `mvn -v` chạy thành công (Apache Maven 3.9.6, Java 25.0.2, Windows 11).
+
+---
+
+### [2026-11-20 21:34:10] Khởi tạo cấu trúc Repo, Git và Thu thập Môi trường
+- **Lệnh thực thi**:
+  - Tạo cấu trúc thư mục: `vendor/`, `src/java`, `test/java`, `benchmark/java`, `scripts/`, `data/`, `results/`, `docs/`.
+  - Khởi tạo git repository: `git init`.
+  - Tạo script thu thập thông tin: `scripts/gather_env.py`.
+  - Sinh file: `results/env.json` và `docs/ENVIRONMENT.md`.
+  - Tạo cấu hình Maven `pom.xml` ghim JMH 1.37, JUnit 5.10.2, compiler release 21.
+  - Tạo JMH benchmark khởi động: `benchmark/java/edu/princeton/cs/algs4/cutoff/WarmupBenchmark.java`.
+  - Tạo `Makefile`, `.gitignore`, `README.md`.
+
+---
+
+### [2026-11-20 21:36:15] Thực thi kiểm tra GATE 1
+- **Lệnh thực thi**:
+  - `python scripts/gather_env.py`
+  - `python -m json.tool results/env.json`
+  - `mvn clean package -DskipTests`
+  - `java -jar target/benchmarks.jar WarmupBenchmark -f 1 -wi 1 -i 1 -r 1s -w 1s`
+- **Kết quả**:
+  - `results/env.json` và `docs/ENVIRONMENT.md` sinh thành công và cú pháp JSON hợp lệ.
+  - Maven build hoàn tất thành công (`BUILD SUCCESS`), sinh ra `target/benchmarks.jar` tích hợp JMH 1.37.
+  - JMH microbenchmark chạy kiểm thử thành công (`Score ≈ 10⁻³ us/op`).
+  - **GATE 1: ĐẠT**.

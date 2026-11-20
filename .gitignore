@@ -1,0 +1,14 @@
+target/
+dependency-reduced-pom.xml
+*.class
+*.jar
+*.log
+*.tmp
+__pycache__/
+*.py[cod]
+*$py.class
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
