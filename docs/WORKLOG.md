@@ -98,3 +98,22 @@ Mọi thao tác, lệnh thực thi, kết quả kiểm tra và mốc thời gian
   - Xuất bảng tổng hợp vào `docs/EQUIVALENCE.md` (300/300 phép thử trùng khớp 100%).
   - Lệnh `make test` chạy trơn tru với 10/10 test suites thành công.
   - **GATE 4: ĐẠT**.
+
+---
+
+### [2026-11-20 21:50:00 - 21:53:00] Thiết lập giả thuyết và sinh dữ liệu thực nghiệm (GATE 5)
+- **Đóng băng giả thuyết**:
+  - Soạn thảo và commit đóng băng [docs/HYPOTHESIS.md](file:///d:/Java-CUTOFF-experiment/docs/HYPOTHESIS.md) trước khi đo lường (kỳ vọng $m^*_{\text{merge}} \approx 16$, $m^*_{\text{quick}} \approx 10-12$, $m^*_{\text{mergeX}} \approx 7$, $m^*_{\text{quickX}} \approx 8$; phân tích sâu tác động của con trỏ `Integer[]` và kiến trúc bộ đệm L1 Cache).
+  - Commit `9428dfa`.
+- **Cấu hình & Sinh dữ liệu**:
+  - `scripts/config.yaml`: 5 seed cố định (`42, 1337, 2026, 31415, 27182`), 5 kích thước $N \in \{10^3, 10^4, 10^5, 10^6, 10^7\}$, 5 phân phối cho Mergesort (`random, sorted, reversed, nearly_sorted, many_duplicates`) và 2 phân phối cho Quicksort (`random, many_duplicates`).
+  - `scripts/gen_data.py`: Dùng `numpy.random.default_rng(seed)`, ghi nhị phân `int32` little-endian vào `data/{dist}_{N}_{seed}.bin` và sinh `data/MANIFEST.csv`.
+  - Khắc phục sự cố gán mảng vectorize của NumPy đối với phân phối `nearly_sorted`, đảm bảo tỷ lệ hoán vị đạt chuẩn xác $\sim 1.00\%$.
+- **Kiểm định dữ liệu GATE 5 (`scripts/verify_data.py`)**:
+  - 125/125 file nhị phân có đúng $N \times 4$ bytes.
+  - Phân phối `sorted` tăng dần, `reversed` giảm dần, `nearly_sorted` đúng tỷ lệ 1%, `many_duplicates` có đúng 100 giá trị khác nhau.
+  - Kiểm tra tính tái lập xác định (Deterministic reproducibility): Sinh lại mẫu dữ liệu cho SHA-256 trùng khớp 100%.
+  - Kiểm tra sanity tại $N = 10^6$: Mảng đã sắp xếp sau khi xáo trộn có thời gian chạy Quicksort xấp xỉ mảng random (tỷ lệ $0.856$).
+  - In bảng thống kê chi tiết các mẫu đại diện.
+  - Tuân thủ giới hạn GitHub: Không commit các file $N \ge 10^6$, ghi nhận hướng dẫn trong `README.md`.
+  - **GATE 5: ĐẠT**.

@@ -21,6 +21,17 @@ Mã nguồn thuật toán được lấy trực tiếp từ thư viện **Prince
 - Python: >= 3.10 với `numpy`, `pandas`, `scipy`, `matplotlib`, `pyyaml`
 - GNU Make
 
+## Quản lý Dữ liệu Thực nghiệm (Datasets & GitHub Limits)
+- Bộ dữ liệu nhị phân chuẩn `int32` little-endian (`.bin`) được sinh xác định 100% bằng script `scripts/gen_data.py` và cấu hình seed cố định trong `scripts/config.yaml`.
+- Danh mục toàn bộ 125 files kèm mã băm SHA-256 và sorted checksum được lưu tại `data/MANIFEST.csv`.
+- **Chính sách giới hạn dung lượng GitHub**:
+  - Các tệp $N \le 10^5$ được lưu trực tiếp trong repository.
+  - Các tệp dung lượng lớn ($N = 10^6$ và $N = 10^7$) được loại trừ khỏi Git theo `.gitignore` nhằm tránh vượt ngưỡng dung lượng repository (chưa dùng Git LFS theo thỏa thuận).
+  - Để tái tạo lại đầy đủ dữ liệu bất kỳ lúc nào, chỉ cần chạy lệnh:
+    ```bash
+    make data
+    ```
+
 ## Các lệnh thực thi
 - `make all`: Chạy toàn bộ pipeline từ sinh dữ liệu đến tạo báo cáo.
 - `make verify`: Kiểm thử tính đúng đắn và xác thực dữ liệu.

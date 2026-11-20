@@ -18,8 +18,9 @@ test:
 	@echo [TEST] Diff checks and unit tests passed.
 
 data:
-	python scripts/generate_data.py
-	@echo [DATA] Datasets generated.
+	python scripts/gen_data.py
+	python scripts/verify_data.py
+	@echo [DATA] Datasets generated and verified.
 
 bench:
 	mvn package -DskipTests

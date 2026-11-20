@@ -1,3 +1,6 @@
+# Large data binary files (N >= 1e6) to stay under GitHub limits
+data/*_1000000_*.bin
+data/*_10000000_*.bin
 target/
 dependency-reduced-pom.xml
 *.class
