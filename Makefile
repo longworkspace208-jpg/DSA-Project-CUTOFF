@@ -13,8 +13,9 @@ env:
 	@echo [ENV] Environment collected and verified.
 
 test:
-	mvn clean test
-	@echo [TEST] Unit tests passed.
+	python scripts/check_diff.py
+	mvn test
+	@echo [TEST] Diff checks and unit tests passed.
 
 data:
 	python scripts/generate_data.py

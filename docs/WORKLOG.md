@@ -56,3 +56,22 @@ Mọi thao tác, lệnh thực thi, kết quả kiểm tra và mốc thời gian
   - Maven build hoàn tất thành công (`BUILD SUCCESS`), sinh ra `target/benchmarks.jar` tích hợp JMH 1.37.
   - JMH microbenchmark chạy kiểm thử thành công (`Score ≈ 10⁻³ us/op`).
   - **GATE 1: ĐẠT**.
+
+---
+
+### [2026-11-20 21:40:00 - 21:44:10] Hiện thực 4 biến thể thuật toán tối thiểu và kiểm tra GATE 3
+- **Thư viện gốc (Princeton algs4)**:
+  - Tải mã nguồn gốc và `algs4.jar` từ `https://raw.githubusercontent.com/kevin-wayne/algs4/master/` và `https://algs4.cs.princeton.edu/code/algs4.jar`.
+  - Lưu trữ tại `vendor/algs4/` và cài đặt dependency vào Maven local repository.
+- **Hiện thực 4 biến thể với sửa đổi tối thiểu**:
+  - `Tier A - MergeCutoff.java`: Thêm tham số `m` (runtime), khi `hi - lo + 1 <= m` chuyển sang `Insertion.sort(a, lo, hi + 1)`. Giữ nguyên cấp phát `aux` một lần, merge và chia `mid`.
+  - `Tier A - QuickCutoff.java`: Thêm tham số `m` (runtime), khi `hi - lo + 1 <= m` chuyển sang `Insertion.sort(a, lo, hi + 1)`. Thêm `sortNoShuffle(a, m)` gọi trực tiếp `sort(a, 0, n-1, m)` phục vụ benchmark. Giữ nguyên thuật toán phân hoạch Hoare, sentinels và hoán vị.
+  - `Tier B - MergeXParam.java`: Đổi hằng `CUTOFF` thành tham số `cutoff`, giữ nguyên toàn bộ cải tiến: bỏ-qua-merge (`!less(src[mid+1], src[mid])`), `System.arraycopy`, và hoán đổi vai trò con trỏ `src`/`dst`.
+  - `Tier B - QuickXParam.java`: Đổi hằng `INSERTION_SORT_CUTOFF` thành tham số `cutoff`, giữ nguyên toàn bộ cải tiến: phân hoạch median-of-3 và sentinels.
+- **Tạo diffs và kiểm tra tự động**:
+  - Sinh diffs bằng `git diff --no-index` vào `docs/diffs/MergeCutoff.diff`, `QuickCutoff.diff`, `MergeXParam.diff`, `QuickXParam.diff`.
+  - Viết `scripts/check_diff.py` kiểm định tính tối thiểu của diff (chỉ cho phép các thay đổi hợp lệ, chặn đứng mọi sửa đổi thuật toán khác).
+- **Kiểm thử tính đúng đắn**:
+  - Viết bộ unit tests toàn diện `test/java/edu/princeton/cs/algs4/CutoffCorrectnessTest.java` kiểm tra với nhiều phân phối (Random, Sorted, Reverse, Duplicates) và nhiều giá trị cutoff $m \in \{1, 2, 4, 7, 8, 12, 16, 24, 32, 64\}$.
+  - Chạy `mvn test`: 4/4 test suites đạt (`Tests run: 4, Failures: 0, Errors: 0, Skipped: 0`).
+  - **GATE 3: ĐẠT**.

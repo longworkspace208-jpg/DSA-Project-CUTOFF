@@ -1,0 +1,65 @@
+diff --git a/vendor/algs4/QuickX.java b/src/java/edu/princeton/cs/algs4/QuickXParam.java
+index c84db26..5ed7c33 100644
+--- a/vendor/algs4/QuickX.java
++++ b/src/java/edu/princeton/cs/algs4/QuickXParam.java
+@@ -25,38 +25,42 @@ package edu.princeton.cs.algs4;
+  *  @author Robert Sedgewick
+  *  @author Kevin Wayne
+  */
+-public class QuickX {
++public class QuickXParam {
+ 
+     // cutoff to insertion sort, must be >= 1
+-    private static final int INSERTION_SORT_CUTOFF = 8;
++    private static final int DEFAULT_CUTOFF = 8;
+ 
+     // This class should not be instantiated.
+-    private QuickX() { }
++    private QuickXParam() { }
+ 
+     /**
+      * Rearranges the array in ascending order, using the natural order.
+      * @param a the array to be sorted
+      */
+-    public static void sort(Comparable[] a) {
++    public static void sort(Comparable[] a, int cutoff) {
+         // StdRandom.shuffle(a);
+-        sort(a, 0, a.length - 1);
++        sort(a, 0, a.length - 1, cutoff);
+         assert isSorted(a);
+     }
+ 
++    public static void sort(Comparable[] a) {
++        sort(a, DEFAULT_CUTOFF);
++    }
++
+     // quicksort the subarray from a[lo] to a[hi]
+-    private static void sort(Comparable[] a, int lo, int hi) {
++    private static void sort(Comparable[] a, int lo, int hi, int cutoff) {
+         if (hi <= lo) return;
+ 
+         // cutoff to insertion sort (Insertion.sort() uses half-open intervals)
+         int n = hi - lo + 1;
+-        if (n <= INSERTION_SORT_CUTOFF) {
++        if (n <= cutoff) {
+             Insertion.sort(a, lo, hi + 1);
+             return;
+         }
+ 
+         int j = partition(a, lo, hi);
+-        sort(a, lo, j-1);
+-        sort(a, j+1, hi);
++        sort(a, lo, j-1, cutoff);
++        sort(a, j+1, hi, cutoff);
+     }
+ 
+     // partition the subarray a[lo..hi] so that a[lo..j-1] <= a[j] <= a[j+1..hi]
+@@ -143,7 +147,7 @@ public class QuickX {
+      */
+     public static void main(String[] args) {
+         String[] a = StdIn.readAllStrings();
+-        QuickX.sort(a);
++        QuickXParam.sort(a);
+         assert isSorted(a);
+         show(a);
+     }

@@ -33,6 +33,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Princeton algs4 library -->
+        <dependency>
+            <groupId>edu.princeton.cs</groupId>
+            <artifactId>algs4</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- JUnit 5 for Correctness Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

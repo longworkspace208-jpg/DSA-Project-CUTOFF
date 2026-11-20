@@ -1,0 +1,66 @@
+diff --git a/vendor/algs4/Merge.java b/src/java/edu/princeton/cs/algs4/MergeCutoff.java
+index af519bc..4f58a55 100644
+--- a/vendor/algs4/Merge.java
++++ b/src/java/edu/princeton/cs/algs4/MergeCutoff.java
+@@ -44,10 +44,10 @@ package edu.princeton.cs.algs4;
+  *  @author Robert Sedgewick
+  *  @author Kevin Wayne
+  */
+-public class Merge {
++public class MergeCutoff {
+ 
+     // This class should not be instantiated.
+-    private Merge() { }
++    private MergeCutoff() { }
+ 
+     // stably merge a[lo .. mid] with a[mid+1 ..hi] using aux[lo .. hi]
+     private static void merge(Comparable[] a, Comparable[] aux, int lo, int mid, int hi) {
+@@ -73,12 +73,15 @@ public class Merge {
+         assert isSorted(a, lo, hi);
+     }
+ 
+-    // mergesort a[lo..hi] using auxiliary array aux[lo..hi]
+-    private static void sort(Comparable[] a, Comparable[] aux, int lo, int hi) {
+-        if (hi <= lo) return;
++    // mergesort a[lo..hi] using auxiliary array aux[lo..hi] with cutoff m
++    private static void sort(Comparable[] a, Comparable[] aux, int lo, int hi, int m) {
++        if (hi - lo + 1 <= m) {
++            Insertion.sort(a, lo, hi + 1);
++            return;
++        }
+         int mid = lo + (hi - lo) / 2;
+-        sort(a, aux, lo, mid);
+-        sort(a, aux, mid + 1, hi);
++        sort(a, aux, lo, mid, m);
++        sort(a, aux, mid + 1, hi, m);
+         merge(a, aux, lo, mid, hi);
+     }
+ 
+@@ -86,12 +89,16 @@ public class Merge {
+      * Rearranges the array in ascending order, using the natural order.
+      * @param a the array to be sorted
+      */
+-    public static void sort(Comparable[] a) {
++    public static void sort(Comparable[] a, int m) {
+         Comparable[] aux = new Comparable[a.length];
+-        sort(a, aux, 0, a.length-1);
++        sort(a, aux, 0, a.length-1, m);
+         assert isSorted(a);
+     }
+ 
++    public static void sort(Comparable[] a) {
++        sort(a, 1);
++    }
++
+ 
+    /***************************************************************************
+     *  Helper sorting function.
+@@ -178,7 +185,7 @@ public class Merge {
+      */
+     public static void main(String[] args) {
+         String[] a = StdIn.readAllStrings();
+-        Merge.sort(a);
++        MergeCutoff.sort(a);
+         show(a);
+     }
+ }

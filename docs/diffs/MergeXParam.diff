@@ -1,0 +1,106 @@
+diff --git a/vendor/algs4/MergeX.java b/src/java/edu/princeton/cs/algs4/MergeXParam.java
+index 72f9b23..fb450a9 100644
+--- a/vendor/algs4/MergeX.java
++++ b/src/java/edu/princeton/cs/algs4/MergeXParam.java
+@@ -44,11 +44,11 @@ import java.util.Comparator;
+  *  @author Robert Sedgewick
+  *  @author Kevin Wayne
+  */
+-public class MergeX {
+-    private static final int CUTOFF = 7;  // cutoff to insertion sort
++public class MergeXParam {
++    private static final int DEFAULT_CUTOFF = 7;  // default cutoff to insertion sort
+ 
+     // This class should not be instantiated.
+-    private MergeX() { }
++    private MergeXParam() { }
+ 
+     private static void merge(Comparable[] src, Comparable[] dst, int lo, int mid, int hi) {
+ 
+@@ -68,15 +68,15 @@ public class MergeX {
+         assert isSorted(dst, lo, hi);
+     }
+ 
+-    private static void sort(Comparable[] src, Comparable[] dst, int lo, int hi) {
++    private static void sort(Comparable[] src, Comparable[] dst, int lo, int hi, int cutoff) {
+         // if (hi <= lo) return;
+-        if (hi <= lo + CUTOFF) {
++        if (hi - lo + 1 <= cutoff) {
+             insertionSort(dst, lo, hi);
+             return;
+         }
+         int mid = lo + (hi - lo) / 2;
+-        sort(dst, src, lo, mid);
+-        sort(dst, src, mid+1, hi);
++        sort(dst, src, lo, mid, cutoff);
++        sort(dst, src, mid+1, hi, cutoff);
+ 
+         // if (!less(src[mid+1], src[mid])) {
+         //    for (int i = lo; i <= hi; i++) dst[i] = src[i];
+@@ -96,12 +96,16 @@ public class MergeX {
+      * Rearranges the array in ascending order, using the natural order.
+      * @param a the array to be sorted
+      */
+-    public static void sort(Comparable[] a) {
++    public static void sort(Comparable[] a, int cutoff) {
+         Comparable[] aux = a.clone();
+-        sort(aux, a, 0, a.length-1);
++        sort(aux, a, 0, a.length-1, cutoff);
+         assert isSorted(a);
+     }
+ 
++    public static void sort(Comparable[] a) {
++        sort(a, DEFAULT_CUTOFF);
++    }
++
+     // sort from a[lo] to a[hi] using insertion sort
+     private static void insertionSort(Comparable[] a, int lo, int hi) {
+         for (int i = lo; i <= hi; i++)
+@@ -142,12 +146,16 @@ public class MergeX {
+      * @param a the array to be sorted
+      * @param comparator the comparator that defines the total order
+      */
+-    public static void sort(Object[] a, Comparator comparator) {
++    public static void sort(Object[] a, Comparator comparator, int cutoff) {
+         Object[] aux = a.clone();
+-        sort(aux, a, 0, a.length-1, comparator);
++        sort(aux, a, 0, a.length-1, comparator, cutoff);
+         assert isSorted(a, comparator);
+     }
+ 
++    public static void sort(Object[] a, Comparator comparator) {
++        sort(a, comparator, DEFAULT_CUTOFF);
++    }
++
+     private static void merge(Object[] src, Object[] dst, int lo, int mid, int hi, Comparator comparator) {
+ 
+         // precondition: src[lo .. mid] and src[mid+1 .. hi] are sorted subarrays
+@@ -167,15 +175,15 @@ public class MergeX {
+     }
+ 
+ 
+-    private static void sort(Object[] src, Object[] dst, int lo, int hi, Comparator comparator) {
++    private static void sort(Object[] src, Object[] dst, int lo, int hi, Comparator comparator, int cutoff) {
+         // if (hi <= lo) return;
+-        if (hi <= lo + CUTOFF) {
++        if (hi - lo + 1 <= cutoff) {
+             insertionSort(dst, lo, hi, comparator);
+             return;
+         }
+         int mid = lo + (hi - lo) / 2;
+-        sort(dst, src, lo, mid, comparator);
+-        sort(dst, src, mid+1, hi, comparator);
++        sort(dst, src, lo, mid, comparator, cutoff);
++        sort(dst, src, mid+1, hi, comparator, cutoff);
+ 
+         // using System.arraycopy() is a bit faster than the above loop
+         if (!less(src[mid+1], src[mid], comparator)) {
+@@ -233,7 +241,7 @@ public class MergeX {
+      */
+     public static void main(String[] args) {
+         String[] a = StdIn.readAllStrings();
+-        MergeX.sort(a);
++        MergeXParam.sort(a);
+         show(a);
+     }
+ }
