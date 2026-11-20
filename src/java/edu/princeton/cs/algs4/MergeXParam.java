@@ -70,7 +70,7 @@ public class MergeXParam {
 
     private static void sort(Comparable[] src, Comparable[] dst, int lo, int hi, int cutoff) {
         // if (hi <= lo) return;
-        if (hi - lo + 1 <= cutoff) {
+        if (hi <= lo + cutoff) {
             insertionSort(dst, lo, hi);
             return;
         }
@@ -177,7 +177,7 @@ public class MergeXParam {
 
     private static void sort(Object[] src, Object[] dst, int lo, int hi, Comparator comparator, int cutoff) {
         // if (hi <= lo) return;
-        if (hi - lo + 1 <= cutoff) {
+        if (hi <= lo + cutoff) {
             insertionSort(dst, lo, hi, comparator);
             return;
         }

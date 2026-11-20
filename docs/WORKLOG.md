@@ -75,3 +75,26 @@ Mọi thao tác, lệnh thực thi, kết quả kiểm tra và mốc thời gian
   - Viết bộ unit tests toàn diện `test/java/edu/princeton/cs/algs4/CutoffCorrectnessTest.java` kiểm tra với nhiều phân phối (Random, Sorted, Reverse, Duplicates) và nhiều giá trị cutoff $m \in \{1, 2, 4, 7, 8, 12, 16, 24, 32, 64\}$.
   - Chạy `mvn test`: 4/4 test suites đạt (`Tests run: 4, Failures: 0, Errors: 0, Skipped: 0`).
   - **GATE 3: ĐẠT**.
+
+---
+
+### [2026-11-20 21:46:20 - 21:49:15] Thực thi kiểm chứng trung thành tuyệt đối và GATE 4
+- **Hiện thực lớp bao bọc**:
+  - `test/java/edu/princeton/cs/algs4/CountingInteger.java`: Bao bọc giá trị `int`, ghi nhận số lần so sánh (`compareCount`) và rolling hash 64-bit (`hash * 31 + (valA * 37 + valB)`) theo đúng thứ tự gọi. Không can thiệp hay sửa đổi bất kỳ mã nguồn nào của Princeton algs4.
+- **Kiểm chứng tương đương thực thi (Equivalence Test)**:
+  - Bản gốc `Merge.sort(a)` so sánh với `MergeCutoff.sort(a, 1)`: Trùng khớp 100% số so sánh, rolling hash và mảng đầu ra.
+  - Bản gốc `Quick.sort` (gọi phương thức đệ quy bên trong qua reflection trên mảng xáo sẵn để loại bỏ RNG shuffle) so sánh với `QuickCutoff.sortNoShuffle(a, 1)`: Trùng khớp 100% số so sánh, rolling hash và mảng đầu ra.
+  - Bản gốc `MergeX.sort(a)` (CUTOFF=7) so sánh với `MergeXParam.sort(a, 7)`: Trùng khớp 100%.
+  - Bản gốc `QuickX.sort(a)` (CUTOFF=8) so sánh với `QuickXParam.sort(a, 8)`: Trùng khớp 100%.
+- **Kiểm thử biên và điều kiện cực trị**:
+  - Thử nghiệm trên hơn 600 cấu hình mảng quanh biên ($0, 1, m-1, m, m+1, 2m, \dots$), mảng rỗng, mảng 1 phần tử, mảng toàn phần tử bằng nhau, mảng sắp sẵn, ngược, số âm, `Integer.MIN_VALUE`, `Integer.MAX_VALUE`. Kết quả khớp 100% với `Arrays.sort`.
+- **Kiểm thử tính ổn định (Stability)**:
+  - `MergeCutoff` và `MergeXParam` duy trì 100% thứ tự tương đối ban đầu của các phần tử có cùng khóa (stable sort).
+  - `QuickCutoff` và `QuickXParam` kiểm tra sắp xếp đúng thứ tự khóa.
+- **Kiểm thử bất biến cây phân hoạch (Partition Tree Invariance)**:
+  - Kiểm tra cây phân hoạch Quicksort cho các đoạn con dài hơn $\max(m)$: Cấu trúc cây và chuỗi phân hoạch hoàn toàn bất biến giữa các giá trị cutoff $m \in \{1, 2, 4, 8, 16, 32\}$.
+- **Sinh báo cáo tương đương**:
+  - `EquivalenceReportRunner` thực thi 300 phép thử đối chiếu qua nhiều seed (42, 1337, 2026), 5 phân phối và nhiều kích thước $N$.
+  - Xuất bảng tổng hợp vào `docs/EQUIVALENCE.md` (300/300 phép thử trùng khớp 100%).
+  - Lệnh `make test` chạy trơn tru với 10/10 test suites thành công.
+  - **GATE 4: ĐẠT**.
